@@ -96,26 +96,6 @@ with st.sidebar:
         help="Terminal growth rate assumption"
     ) / 100
     
-    # Terminal Value multiplier
-    terminal_value_mult = st.slider(
-        "Terminal Value Multiplier",
-        min_value=0.5,
-        max_value=2.0,
-        value=1.0,
-        step=0.05,
-        help="Multiplier for terminal value"
-    )
-    
-    # FCF Multiplier
-    fcf_mult = st.slider(
-        "FCF Multiplier",
-        min_value=0.5,
-        max_value=2.0,
-        value=1.0,
-        step=0.05,
-        help="Multiplier applied to all FCF years"
-    )
-    
     st.markdown("---")
     st.subheader("Individual FCF Years")
     
@@ -127,11 +107,15 @@ with st.sidebar:
             f"{year} (¥000s)",
             min_value=0,
             max_value=int(base_value * 3),
-            value=int(base_value * fcf_mult),
+            value=int(base_value),
             step=1000,
             key=f"fcf_{year}"
         )
         adjusted_fcf[year] = adjusted_value
+
+# Set default multipliers to 1.0 (no adjustment)
+terminal_value_mult = 1.0
+fcf_mult = 1.0
 
 # Calculate adjusted metrics
 adjusted_share_price, adjusted_equity_value, adjusted_enterprise_value = calculate_share_price(
@@ -211,6 +195,7 @@ with col1:
         height=400
     )
     st.plotly_chart(fig_fcf, use_container_width=True)
+    st.markdown("hi")
 
 with col2:
     st.subheader("💧 Valuation Waterfall")
@@ -237,14 +222,15 @@ with col2:
         connector={"line": {"color": "rgb(63, 63, 63)"}},
         increasing={"marker": {"color": "rgb(55, 83, 109)"}},
         decreasing={"marker": {"color": "rgb(219, 64, 82)"}},
-        totals={"marker": {"color": "rgb(46, 125, 50)"}}
+        totals={"marker": {"color": "rgb(46, 125, 50)"}},
+        
     ))
     
     fig_waterfall.update_layout(
         title="DCF Valuation Components",
         yaxis_title="Value (¥000s)",
         template='plotly_white',
-        height=400,
+        height=500,
         showlegend=False
     )
     st.plotly_chart(fig_waterfall, use_container_width=True)
@@ -279,61 +265,11 @@ fig_heatmap1 = go.Figure(data=go.Heatmap(
 fig_heatmap1.update_layout(
     xaxis_title="WACC (%)",
     yaxis_title="Growth Rate (%)",
-    height=400,
+    height=500,
     template='plotly_white'
 )
 st.plotly_chart(fig_heatmap1, use_container_width=True)
 
-# Heatmaps Row 2
-col1, col2 = st.columns(2)
-
-with col1:
-    st.subheader("WACC vs Terminal Value Multiplier")
-    sensitivity_wacc_terminal = np.zeros((len(terminal_mult_range), len(wacc_range)))
-    for i, tm in enumerate(terminal_mult_range):
-        for j, w in enumerate(wacc_range):
-            share_price, _, _ = calculate_share_price(w, 0.02, tm, 1.0, PERPETUITY_GROWTH_METHOD)
-            sensitivity_wacc_terminal[i, j] = share_price
-    
-    fig_heatmap2 = go.Figure(data=go.Heatmap(
-        z=sensitivity_wacc_terminal,
-        x=[f"{w*100:.1f}%" for w in wacc_range],
-        y=[f"{tm:.2f}x" for tm in terminal_mult_range],
-        colorscale='RdYlGn',
-        colorbar=dict(title="Share Price (¥)"),
-        hovertemplate='WACC: %{x}<br>Terminal Mult: %{y}<br>Share Price: ¥%{z:,.0f}<extra></extra>'
-    ))
-    fig_heatmap2.update_layout(
-        xaxis_title="WACC (%)",
-        yaxis_title="Terminal Value Multiplier",
-        height=400,
-        template='plotly_white'
-    )
-    st.plotly_chart(fig_heatmap2, use_container_width=True)
-
-with col2:
-    st.subheader("Growth Rate vs FCF Multiplier")
-    sensitivity_growth_fcf = np.zeros((len(fcf_mult_range), len(growth_range)))
-    for i, fm in enumerate(fcf_mult_range):
-        for j, gr in enumerate(growth_range):
-            share_price, _, _ = calculate_share_price(0.093, gr, 1.0, fm, PERPETUITY_GROWTH_METHOD)
-            sensitivity_growth_fcf[i, j] = share_price
-    
-    fig_heatmap3 = go.Figure(data=go.Heatmap(
-        z=sensitivity_growth_fcf,
-        x=[f"{g*100:.1f}%" for g in growth_range],
-        y=[f"{fm:.2f}x" for fm in fcf_mult_range],
-        colorscale='RdYlGn',
-        colorbar=dict(title="Share Price (¥)"),
-        hovertemplate='Growth: %{x}<br>FCF Mult: %{y}<br>Share Price: ¥%{z:,.0f}<extra></extra>'
-    ))
-    fig_heatmap3.update_layout(
-        xaxis_title="Growth Rate (%)",
-        yaxis_title="FCF Multiplier",
-        height=400,
-        template='plotly_white'
-    )
-    st.plotly_chart(fig_heatmap3, use_container_width=True)
 
 # Additional DCF Details
 st.markdown("---")
