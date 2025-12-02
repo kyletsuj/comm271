@@ -16,6 +16,11 @@ import plotly.express as px
 
 
 # 2. Global constants (user inputs)
+# Balance sheet adjustments (millions)
+CASH = 1909164      # example: 1,909,164 mm
+DEBT = 0
+MINORITY_INTEREST = 1121
+
 
 # Free cash flows for forecast years (in millions)
 FCF = np.array([
@@ -107,28 +112,33 @@ def run_simulation():
     results = []
 
     for i in range(N):
-        val = dcf_valuation(
+        # Enterprise value from DCF
+        enterprise_value = dcf_valuation(
             fcf=FCF,
             wacc=wacc_samples[i],
             g=g_samples[i],
             exit_multiple=exit_samples[i],
         )
 
-        price_per_share = val / SHARES_OUT
+        # Convert to equity value and implied share price
+        equity_value = enterprise_value + CASH - DEBT - MINORITY_INTEREST
+        implied_share_price = equity_value / SHARES_OUT
 
         results.append({
             "trial": i,
             "wacc": wacc_samples[i],
             "g": g_samples[i],
             "exit_multiple": exit_samples[i],
-            "enterprise_value": val,
-            "price_per_share": price_per_share,
+            "enterprise_value": enterprise_value,
+            "equity_value": equity_value,
+            "price_per_share": implied_share_price,
         })
 
     df = pd.DataFrame(results)
     df.to_csv("mc_results_hardcoded.csv", index=False)
 
     print("Monte Carlo completed.")
+    print("Implied share price distribution (¥):")
     print(df["price_per_share"].describe())
     print("Saved results to mc_results_hardcoded.csv")
 
@@ -165,14 +175,17 @@ if isinstance(df, pd.DataFrame):
 
     # Summary stats (exclude trial, exit_multiple, and 'count' row)
     st.write("### Summary Statistics")
-    summary_cols = ["wacc", "g", "enterprise_value", "price_per_share"]
+    summary_cols = ["wacc", "g", "enterprise_value", "equity_value", "price_per_share"]
     stats = df[summary_cols].describe().drop(index="count")
     # Convert wacc and g from decimals to percentage values
     stats[["wacc", "g"]] = stats[["wacc", "g"]] * 100
     stats["wacc"] = stats["wacc"].map(lambda x: f"{x:.2f}%")
     stats["g"] = stats["g"].map(lambda x: f"{x:.2f}%")
-    # Format enterprise value and price per share as yen with commas and 2 decimals
+    # Format enterprise value, equity value, and price per share as yen with commas and 2 decimals
     stats["enterprise_value"] = stats["enterprise_value"].map(
+        lambda x: f"¥{x:,.2f}"
+    )
+    stats["equity_value"] = stats["equity_value"].map(
         lambda x: f"¥{x:,.2f}"
     )
     stats["price_per_share"] = stats["price_per_share"].map(
