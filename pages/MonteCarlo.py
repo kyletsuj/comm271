@@ -1,34 +1,31 @@
 """
-Pure-Python Monte Carlo DCF Simulation
-(Paste into Cursor)
+Pure-Python Monte Carlo DCF Simulation (Streamlit page)
 
 You manually hardcode:
     - Free cash flows
     - Terminal value method
     - Shares outstanding
-
-Run:
-    python monte_carlo_dcf.py
 """
 
+# 1. Imports
 import numpy as np
 import pandas as pd
+import streamlit as st
 
-# -------------------------------------
-# USER INPUT SECTION — EDIT THIS PART
-# -------------------------------------
 
-# Free cash flows for forecast years (in millions USD/CAD etc.)
+# 2. Global constants (user inputs)
+
+# Free cash flows for forecast years (in millions)
 FCF = np.array([
-    16911,  # Year 1
+    16911,   # Year 1
     226868,  # Year 2
     378794,  # Year 3
     671380,  # Year 4
     818350   # Year 5
 ])
 
-# Shares outstanding
-SHARES_OUT = 1164.20  # in millions (example)
+# Shares outstanding (in millions)
+SHARES_OUT = 1164.20
 
 # Terminal value method: choose "perpetuity" or "exit"
 TERMINAL_METHOD = "perpetuity"
@@ -54,18 +51,19 @@ N = 5000
 SEED = 42
 
 
-# -------------------------------------
-# CORE DCF FUNCTIONS
-# -------------------------------------
+# 3. Helper functions
 
 def terminal_value_perpetuity(last_fcf, wacc, g):
-    """ Gordon Growth Model """
+    """Gordon Growth Model."""
     return last_fcf * (1 + g) / (wacc - g)
 
+
 def terminal_value_multiple(exit_multiple, terminal_ebitda):
-    """ Exit multiple terminal value """
+    """Exit multiple terminal value."""
     return exit_multiple * terminal_ebitda
 
+
+# 4. Core DCF functions
 
 def dcf_valuation(fcf, wacc, g=None, exit_multiple=None):
     """
@@ -89,9 +87,7 @@ def dcf_valuation(fcf, wacc, g=None, exit_multiple=None):
     return pv_fcf + pv_tv
 
 
-# -------------------------------------
-# MONTE CARLO RUN
-# -------------------------------------
+# 5. Monte Carlo simulation function
 
 def run_simulation():
     np.random.seed(SEED)
@@ -113,7 +109,7 @@ def run_simulation():
             fcf=FCF,
             wacc=wacc_samples[i],
             g=g_samples[i],
-            exit_multiple=exit_samples[i]
+            exit_multiple=exit_samples[i],
         )
 
         price_per_share = val / SHARES_OUT
@@ -124,7 +120,7 @@ def run_simulation():
             "g": g_samples[i],
             "exit_multiple": exit_samples[i],
             "enterprise_value": val,
-            "price_per_share": price_per_share
+            "price_per_share": price_per_share,
         })
 
     df = pd.DataFrame(results)
@@ -136,26 +132,22 @@ def run_simulation():
 
     return df
 
-# ---- STREAMLIT PRICE DISTRIBUTION GRAPH ----
-import streamlit as st
-import pandas as pd
-import altair as alt
 
-st.subheader("Monte Carlo Price Distribution")
+# 6. Run the simulation → df = run_simulation()
 
-# Convert results to a DataFrame if needed
-if not isinstance(df, pd.DataFrame):
-    df = pd.DataFrame({"price_per_share": df})
+df = run_simulation()
 
-# Altair histogram chart
-chart = (
-    alt.Chart(df)
-    .mark_bar(opacity=0.85)
-    .encode(
-        alt.X("price_per_share:Q", bin=alt.Bin(maxbins=50), title="Price per Share"),
-        alt.Y("count()", title="Frequency"),
-    )
-    .properties(height=300)
-)
 
-st.altair_chart(chart, use_container_width=True)
+# 7. Visualization code (Streamlit)
+
+if isinstance(df, pd.DataFrame):
+    st.subheader("Monte Carlo Simulation Results")
+
+    # Histogram / distribution of price per share
+    st.bar_chart(df["price_per_share"])
+
+    # Summary stats
+    st.write("### Summary Statistics")
+    st.write(df.describe())
+else:
+    st.error("Simulation output is not a DataFrame. Cannot generate chart.")
