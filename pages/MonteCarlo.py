@@ -156,12 +156,18 @@ if isinstance(df, pd.DataFrame):
                 alt.Tooltip("price_per_share:Q", title="Price (¥)", format=","),
             ],
         )
-        .properties(height=300)
+        .properties(height=600)
     )
     st.altair_chart(price_chart, use_container_width=True)
 
-    # Summary stats
+    # Summary stats (exclude trial, exit_multiple, and 'count' row)
     st.write("### Summary Statistics")
-    st.write(df.describe())
+    summary_cols = ["wacc", "g", "enterprise_value", "price_per_share"]
+    stats = df[summary_cols].describe().drop(index="count")
+    # Convert wacc and g from decimals to percentage values
+    stats[["wacc", "g"]] = stats[["wacc", "g"]] * 100
+    stats["wacc"] = stats["wacc"].map(lambda x: f"{x:.2f}%")
+    stats["g"] = stats["g"].map(lambda x: f"{x:.2f}%")
+    st.write(stats)
 else:
     st.error("Simulation output is not a DataFrame. Cannot generate chart.")
