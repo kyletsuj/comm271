@@ -11,6 +11,7 @@ You manually hardcode:
 import numpy as np
 import pandas as pd
 import streamlit as st
+import altair as alt
 
 
 # 2. Global constants (user inputs)
@@ -143,8 +144,21 @@ df = run_simulation()
 if isinstance(df, pd.DataFrame):
     st.subheader("Monte Carlo Simulation Results")
 
-    # Histogram / distribution of price per share
-    st.bar_chart(df["price_per_share"])
+    # Price per share (¥) on x-axis, trial index on y-axis (hidden)
+    price_chart = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=alt.X("price_per_share:Q", title="Price per Share (¥)"),
+            y=alt.Y("trial:Q", axis=None),
+            tooltip=[
+                alt.Tooltip("trial:Q", title="Trial"),
+                alt.Tooltip("price_per_share:Q", title="Price (¥)", format=","),
+            ],
+        )
+        .properties(height=300)
+    )
+    st.altair_chart(price_chart, use_container_width=True)
 
     # Summary stats
     st.write("### Summary Statistics")
