@@ -25,20 +25,20 @@ UNLEVERED_FCF = {
 }
 
 PERPETUITY_GROWTH_METHOD = {
-    "Sum_PV_FCF": 1_490_580,
+    "Sum_PV_FCF": 1_487_996,
     "Growth_Rate": 0.02,
-    "WACC": 0.0930,
-    "Terminal_Value": 11_434_476,
-    "PV_Terminal_Value": 7_330_194,
-    "Enterprise_Value": 8_820_774,
+    "WACC": 0.0935,
+    "Terminal_Value": 11_358_236,
+    "PV_Terminal_Value": 7_265_020,
+    "Enterprise_Value": 8_757_256,
     "Cash": 1_909_164,
     "Debt": 0,
     "Minority_Interest": 1_121,
-    "Equity_Value": 10_728_817,
+    "Equity_Value": 10_661_059,
     "Diluted_Shares_Outstanding_mm": 1164.20,
-    "Implied_Share_Price": 9216,
+    "Implied_Share_Price": 9157,
     "Current_Share_Price": 13005,
-    "Implied_Upside": -0.29,
+    "Implied_Upside": -0.2959,
     "Implied_Exit_Multiple": 11.72,
 }
 
