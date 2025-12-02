@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import altair as alt
+import plotly.express as px
 
 
 # 2. Global constants (user inputs)
@@ -144,21 +145,23 @@ df = run_simulation()
 if isinstance(df, pd.DataFrame):
     st.subheader("Monte Carlo Simulation Results")
 
-    # Price per share (¥) on x-axis, trial index on y-axis (hidden)
-    price_chart = (
-        alt.Chart(df)
-        .mark_bar()
-        .encode(
-            x=alt.X("price_per_share:Q", title="Price per Share (¥)"),
-            y=alt.Y("trial:Q", axis=None),
-            tooltip=[
-                alt.Tooltip("trial:Q", title="Trial"),
-                alt.Tooltip("price_per_share:Q", title="Price (¥)", format=","),
-            ],
-        )
-        .properties(height=600)
+    # Price per share distribution (Plotly histogram)
+    fig = px.histogram(
+        df,
+        x="price_per_share",
+        nbins=50,
+        title="Price Per Share Distribution",
+        opacity=0.75,
+        marginal="box",  # adds a box plot above — very clean
     )
-    st.altair_chart(price_chart, use_container_width=True)
+    fig.update_layout(
+        xaxis_title="Price per Share (¥)",
+        yaxis_title="Frequency",
+        bargap=0.02,
+        height=600,
+        template="plotly_white",
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
     # Summary stats (exclude trial, exit_multiple, and 'count' row)
     st.write("### Summary Statistics")
@@ -168,6 +171,13 @@ if isinstance(df, pd.DataFrame):
     stats[["wacc", "g"]] = stats[["wacc", "g"]] * 100
     stats["wacc"] = stats["wacc"].map(lambda x: f"{x:.2f}%")
     stats["g"] = stats["g"].map(lambda x: f"{x:.2f}%")
+    # Format enterprise value and price per share as yen with commas and 2 decimals
+    stats["enterprise_value"] = stats["enterprise_value"].map(
+        lambda x: f"¥{x:,.2f}"
+    )
+    stats["price_per_share"] = stats["price_per_share"].map(
+        lambda x: f"¥{x:,.2f}"
+    )
     st.write(stats)
 else:
     st.error("Simulation output is not a DataFrame. Cannot generate chart.")
