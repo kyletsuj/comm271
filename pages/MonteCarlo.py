@@ -156,11 +156,6 @@ def run_simulation():
 
 df = run_simulation()
 
-sensitivity_wacc_growth = np.zeros((len(growth_range), len(wacc_range)))
-for i, gr in enumerate(growth_range):
-    for j, w in enumerate(wacc_range):
-        share_price, _, _ = calculate_share_price(w, gr, 1.0, 1.0, PERPETUITY_GROWTH_METHOD)
-        sensitivity_wacc_growth[i, j] = share_price
 # 7. Visualization code (Streamlit)
 
 if isinstance(df, pd.DataFrame):
