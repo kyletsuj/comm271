@@ -183,7 +183,7 @@ if isinstance(df, pd.DataFrame):
     # Summary stats (exclude trial, exit_multiple, and 'count' row)
     st.write("### Summary Statistics")
     summary_cols = ["wacc", "g", "enterprise_value", "equity_value", "price_per_share"]
-    stats = df[summary_cols].describe().drop(index="count")
+    stats = df[summary_cols].describe().drop(index=["count", "std"])
     # Convert wacc and g from decimals to percentage values
     stats[["wacc", "g"]] = stats[["wacc", "g"]] * 100
     stats["wacc"] = stats["wacc"].map(lambda x: f"{x:.2f}%")

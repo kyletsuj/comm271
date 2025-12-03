@@ -247,29 +247,35 @@ growth_range = np.linspace(0.00, 0.05, 11)
 terminal_mult_range = np.linspace(0.5, 2.0, 16)
 fcf_mult_range = np.linspace(0.5, 2.0, 16)
 
-# Heatmap 1: WACC vs Growth Rate
-st.subheader("WACC vs Growth Rate (Impact on Share Price)")
-sensitivity_wacc_growth = np.zeros((len(growth_range), len(wacc_range)))
-for i, gr in enumerate(growth_range):
-    for j, w in enumerate(wacc_range):
-        share_price, _, _ = calculate_share_price(w, gr, 1.0, 1.0, PERPETUITY_GROWTH_METHOD)
-        sensitivity_wacc_growth[i, j] = share_price
+# Determine min/max for normalization
+z_min, z_mid, z_max = 6000, 8000, 10000
+
+custom_colorscale = [
+    [0.0, "green"],     # 6000
+    [0.5, "yellow"],    # 8000
+    [1.0, "red"]        # 10000
+]
 
 fig_heatmap1 = go.Figure(data=go.Heatmap(
     z=sensitivity_wacc_growth,
     x=[f"{w*100:.1f}%" for w in wacc_range],
     y=[f"{g*100:.1f}%" for g in growth_range],
-    colorscale='RdYlGn',
+    colorscale=custom_colorscale,
+    zmin=z_min,
+    zmax=z_max,
     colorbar=dict(title="Share Price (¥)"),
     hovertemplate='WACC: %{x}<br>Growth: %{y}<br>Share Price: ¥%{z:,.0f}<extra></extra>'
 ))
+
 fig_heatmap1.update_layout(
     xaxis_title="WACC (%)",
     yaxis_title="Growth Rate (%)",
     height=500,
-    template='plotly_white'
+    template="plotly_white"
 )
+
 st.plotly_chart(fig_heatmap1, use_container_width=True)
+
 
 
 # Additional DCF Details
