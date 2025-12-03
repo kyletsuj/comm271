@@ -11,7 +11,7 @@ You manually hardcode:
 import numpy as np
 import pandas as pd
 import streamlit as st
-import altair as alt
+#import altair as alt
 import plotly.express as px
 
 
@@ -39,7 +39,7 @@ TERMINAL_METHOD = "perpetuity"
 
 # If using perpetuity growth:
 PGR_MEAN = 0.02
-PGR_STD = 0.005
+PGR_STD = 0.0025
 
 # If using exit multiple:
 EXIT_LOW = 6.0
@@ -48,8 +48,8 @@ EXIT_HIGH = 10.0
 EBITDA_TERM_YEAR = 6200  # example terminal EBITDA
 
 # WACC distribution
-WACC_MEAN = 0.0935
-WACC_STD = 0.01
+WACC_MEAN = 0.1035
+WACC_STD = 0.015
 
 # Number of Monte Carlo trials
 N = 5000
@@ -57,6 +57,13 @@ N = 5000
 # Random seed
 SEED = 42
 
+
+st.set_page_config(
+    page_title="Monte Carlo Simulation",
+    page_icon="🎲",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # 3. Helper functions
 
@@ -159,7 +166,7 @@ if isinstance(df, pd.DataFrame):
     fig = px.histogram(
         df,
         x="price_per_share",
-        nbins=50,
+        nbins=100,
         title="Price Per Share Distribution",
         opacity=0.75,
         marginal="box",  # adds a box plot above — very clean

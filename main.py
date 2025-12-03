@@ -49,7 +49,8 @@ def calculate_share_price(wacc, growth_rate, terminal_value_mult, fcf_mult, base
     adjusted_sum_pv_fcf = base_values["Sum_PV_FCF"] * fcf_mult
     
     # Adjust terminal value
-    adjusted_terminal_value = base_values["Terminal_Value"] * terminal_value_mult
+    # TV = final year FCF * (1 + growth rate) / (WACC - growth rate)
+    adjusted_terminal_value = UNLEVERED_FCF[2030] * (1 + growth_rate) / (wacc - growth_rate)
     
     # Recalculate PV of terminal value with new WACC
     # Using simplified approach: PV = TV / (1 + WACC)^n where n is number of years
