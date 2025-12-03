@@ -254,7 +254,21 @@ custom_colorscale = [
     [0.0, "green"],     # 6000
     [0.5, "yellow"],    # 8000
     [1.0, "red"]        # 10000
-]
+]# --- FIX: Build sensitivity_wacc_growth before using it ---
+sensitivity_wacc_growth = np.zeros((len(growth_range), len(wacc_range)))
+
+for i, gr in enumerate(growth_range):
+    for j, w in enumerate(wacc_range):
+        try:
+            share_price, _, _ = calculate_share_price(
+                w, gr, 1.0, 1.0, PERPETUITY_GROWTH_METHOD
+            )
+        except ZeroDivisionError:
+            share_price = np.nan  # handle WACC == g edge case safely
+        sensitivity_wacc_growth[i, j] = share_price
+# ----------------------------------------------------------
+fig_heatmap1 = go.Figure(data=go.Heatmap(
+
 
 fig_heatmap1 = go.Figure(data=go.Heatmap(
     z=sensitivity_wacc_growth,
