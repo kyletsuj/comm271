@@ -267,7 +267,7 @@ for i, gr in enumerate(growth_range):
             share_price = np.nan  # handle WACC == g edge case safely
         sensitivity_wacc_growth[i, j] = share_price
 # ----------------------------------------------------------
-fig_heatmap1 = go.Figure(data=go.Heatmap(
+fig_heatmap1 = go.Figure(data=go.Heatmap)
 
 
 fig_heatmap1 = go.Figure(data=go.Heatmap(
